@@ -1,0 +1,118 @@
+# Use the hatchling build backend, with the hatch-odoo plugin.
+[build-system]
+requires = ["hatchling", "hatch-odoo"]
+build-backend = "hatchling.build"
+
+# The standard project metadata section
+# https://packaging.python.org/en/latest/specifications/declaring-project-metadata/
+[project]
+name = "odoo-matournee"
+description = "matournee Odoo Addons"
+version = "16.0.1.0.0"
+readme = "README.md"
+requires-python = "==3.11.*"
+# Dependencies are dynamic because they will be generated from Odoo addons manifests.
+dynamic = ["dependencies"]
+
+[project.optional-dependencies]
+test = [
+  "checklog-odoo",
+  "coverage",
+  "pygments",  # to silence Odoo warning which uses pygments for README.rst rendering
+  "manifestoo",
+]
+doc = []
+dev = [
+  "pytest",
+  "pytest-cov",
+  "pytest-odoo",
+  "watchdog"
+]
+
+[project.scripts]
+
+[tool.hatch.build]
+packages = ["odoo", "odoo_matournee"]
+
+# Enable the hatch-odoo metadata hook to generate dependencies from addons manifests.
+[tool.hatch.metadata.hooks.odoo-addons-dependencies]
+
+[tool.hatch-odoo]
+# If our addons have non standard version numbers, let's help hatch-odoo discover the Odoo version.
+odoo_version_override = "16.0"
+# Add dependencies that are not declared in Odoo addons manifests.
+dependencies = [
+  "click-odoo-contrib",
+  # Addons that are not declared in manifests because we don't want
+  # them installed automatically.
+  "odoo-addon-session_db",
+  # Optional Odoo dependencies not in Odoo's setup.py
+  "freezegun",
+  "reportlab<4",
+  "num2words",
+  "pdfminer",
+  "pypdf2<3",
+  # xlrd<2 because Odoo relies on it to import xlsx files and xlrd 2 dropped that capability
+  "xlrd<2",
+]
+addons_dirs = ["odoo/addons"]
+
+#####################################################################################
+# pip-deepfreeze and post-sync commands
+#
+
+[tool.pip-deepfreeze]
+min_version = "2.0"
+
+[tool.pip-deepfreeze.sync]
+extras = "test,dev"
+post_sync_commands = [
+  "pip-preserve-requirements requirements*.txt",
+]
+
+[tool.pip-preserve-requirements]
+tag_prefix = "16.0+mat+"
+match_any_tag = true
+
+[[tool.pip-preserve-requirements.vcs_vaults]]
+provider = "github.com"
+owner = "acsone"
+default = true
+
+#####################################################################################
+# ruff
+#
+
+[tool.ruff]
+target-version = "py311"
+fix = true
+# https://beta.ruff.rs/docs/rules/
+select = [
+  "B", # flake8-bugbear
+  "C4", # flake8-comprehensions
+  "C90", # mccabe
+  "E", # pycodestyle errors
+  "F", # Pyflakes
+  "I", # isort
+  "RUF", # ruff specific rules
+  "T10", # flake8-debugger
+  "UP", # pyupgrade
+  "UP", # pyupgrade
+  "W", # pycodestyle warnings
+]
+ignore = [
+  "E501", # line too long (covered by B950)
+  "RUF012", # Odoo commonly uses list class variables (_inherit, _sql_constraints,...)
+]
+ignore-init-module-imports = true
+
+[tool.ruff.per-file-ignores]
+"__init__.py" = ["F401", "I001"]  # ignore unused and unsorted imports in __init__.py
+"__manifest__.py" = ["B018"]  # useless expression
+
+[tool.ruff.isort]
+section-order = ["future", "standard-library", "third-party", "odoo", "odoo-addons", "first-party", "local-folder"]
+
+[tool.ruff.isort.sections]
+"odoo" = ["odoo"]
+"odoo-addons" = ["odoo.addons"]
