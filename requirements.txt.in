@@ -1,0 +1,11 @@
+# odoo
+# -r https://raw.githubusercontent.com/odoo/odoo/16.0/requirements.txt
+pypdf2<2
+werkzeug<2.1
+odoo @ git+https://github.com/acsone/odoo.git@16.0-mat_master
+
+# patched ACSONE addons
+# ...
+
+# patched OCA addons
+# odoo-addon-{addon} @ git+https://github.com/OCA/{oca-project}.git@refs/pull/NNN/head#subdirectory=setup/{addon}

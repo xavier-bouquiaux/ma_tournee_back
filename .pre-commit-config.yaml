@@ -1,0 +1,67 @@
+exclude: |
+  (?x)
+  .pot$|
+  .po$|
+  ^.gitlab|
+  # NOT INSTALLABLE ADDONS
+  # END NOT INSTALLABLE ADDONS
+  ^LICENCE
+default_language_version:
+  python: python3.11
+  node: "16.17.0"
+repos:
+  - repo: https://github.com/oca/maintainer-tools
+    rev: a24deac77aff2f3c968b3b4c269d6aec91a379da
+    hooks:
+      # update the NOT INSTALLABLE ADDONS section above
+      - id: oca-update-pre-commit-excluded-addons
+        args: [--addons-dir=odoo/addons]
+  - repo: https://github.com/psf/black
+    rev: 23.9.1
+    hooks:
+      - id: black
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v3.0.3
+    hooks:
+      - id: prettier
+        name: prettier + plugin-xml
+        additional_dependencies:
+          - "prettier@3.0.3"
+          - "@prettier/plugin-xml@3.2.2"
+  - repo: https://github.com/pre-commit/mirrors-eslint
+    rev: v8.34.0
+    hooks:
+      - id: eslint
+        verbose: true
+        args:
+          - --color
+          - --fix
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: debug-statements
+      - id: fix-encoding-pragma
+        args: ["--remove"]
+      - id: check-case-conflict
+      - id: check-docstring-first
+      - id: check-executables-have-shebangs
+      - id: check-merge-conflict
+        # exclude files where underlines are not distinguishable from merge conflicts
+        exclude: /README\.rst$|^docs/.*\.rst$
+      - id: check-symlinks
+      - id: check-xml
+      - id: mixed-line-ending
+        args: ["--fix=lf"]
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: "v0.0.289"
+    hooks:
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+  - repo: https://github.com/OCA/pylint-odoo
+    rev: 7.0.5
+    hooks:
+      - id: pylint_odoo
+        files: odoo/addons/
